@@ -15,7 +15,18 @@
 SerialBridge::SerialBridge(SerialDev *dev, const unsigned int buff_size)
 :   _id_list(), _buff_size(buff_size)
 {
-    _dev = new CobsSerial(dev, _buff_size);
+    _si = new CobsSerial(dev, _buff_size);
+}
+
+/**
+* @brief SerialBridge class constructor.
+* @param[in] dev (SyncSerialDev class pointer) 
+*                An argument that indicates a synchronous serial device class object.
+*/
+SerialBridge::SerialBridge(SyncSerialDev *dev)
+:   _id_list(), _buff_size(dev->size())
+{
+    _si = new SyncableSerial(dev);
 }
 
 /**
@@ -23,7 +34,7 @@ SerialBridge::SerialBridge(SerialDev *dev, const unsigned int buff_size)
 */
 SerialBridge::~SerialBridge()
 {
-    delete _dev;
+    delete _si;
 }
 
 /**
@@ -96,7 +107,7 @@ int SerialBridge::write(SerialBridge::frame_id id)
         return -1; //undefined data structure
 
     _str[order]->packing(id);
-    return _dev->write(_str[order]->ptr(), _str[order]->size());
+    return _si->write(_str[order]->ptr(), _str[order]->size());
 }
 
 /**
@@ -111,7 +122,7 @@ int SerialBridge::write(SerialBridge::frame_id id)
 */
 int SerialBridge::update()
 {
-    _dev->update();
+    _si->update();
     return _update_frame();
 }
 
@@ -144,7 +155,7 @@ int SerialBridge::_update_frame()
 {
     uint8_t tmp[_buff_size];
     memset(&tmp, 0, _buff_size);
-    int len = _dev->read(tmp) - 1;
+    int len = _si->read(tmp) - 1;
     if(len > 0){
         int order = _id_2_order(tmp[0]);
 
