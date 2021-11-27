@@ -21,9 +21,6 @@ TO MICROCHIP FOR THIS SOFTWARE.
 
 #ifdef __linux__
 
-#ifndef _MCP2210_API_H_
-#define _MCP2210_API_H_
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -77,42 +74,42 @@ typedef struct stSpiXferSettings_S
 } stSpiXferSettings_T;
 
 /* Library API */
-int open_device(const char *device);
+extern int open_device(const char *device);
 
-int spi_data_xfer(int filedesc, unsigned char *txdata,
+extern int spi_data_xfer(int filedesc, unsigned char *txdata,
                     unsigned char *rxdata, int xferlength,
                     int spimode, int speed,
                     int actcsval, int idlecsval, int gpcsmask,
                     int cs2datadly, int data2datadly, int data2csdly);
 
-int read_eeprom(int filedesc, int address, unsigned char *readdata);
-int write_eeprom(int filedesc, int address, unsigned char writedata);
+extern int read_eeprom(int filedesc, int address, unsigned char *readdata);
+extern int write_eeprom(int filedesc, int address, unsigned char writedata);
 
-int gpio_write(int filedesc, int gpioval, int gpiomask);
-int gpio_read(int filedesc, int *pgpioval, int gpiomask);
-int gpio_direction(int filedesc, int gpiodir, int gpiomask);
+extern int gpio_write(int filedesc, int gpioval, int gpiomask);
+extern int gpio_read(int filedesc, int *pgpioval, int gpiomask);
+extern int gpio_direction(int filedesc, int gpiodir, int gpiomask);
 					
-int close_device(int filedesc);
+extern int close_device(int filedesc);
 
 /*==========================================================*/
 /* Other internal functions */
-int get_chip_status(int filedesc, stChipStatus_T *pstchipstatus);
-int get_spi_xfer_params(int filedesc, 
+extern int get_chip_status(int filedesc, stChipStatus_T *pstchipstatus);
+extern int get_spi_xfer_params(int filedesc, 
 			stSpiXferSettings_T *pstspixfersettings);
-int set_spi_xfer_params(int filedesc, 
+extern int set_spi_xfer_params(int filedesc, 
 			stSpiXferSettings_T *pstspixfersettings);
-int get_crt_settings(int filedesc, stDevChipSettings_T *pstsettings);
-int set_crt_settings(int filedesc, stDevChipSettings_T *pstsettings);
-int xfer_spi_data(int filedesc, unsigned char *txdata, 
+extern int get_crt_settings(int filedesc, stDevChipSettings_T *pstsettings);
+extern int set_crt_settings(int filedesc, stDevChipSettings_T *pstsettings);
+extern int xfer_spi_data(int filedesc, unsigned char *txdata, 
                     unsigned char *rxdata, uint8_t *pucdatalentx, 
                     uint8_t *pucdatalenrx, uint8_t *presultcode);
-int gpio_setval(int filedesc, uint16_t gpvalue);
-int gpio_getval(int filedesc, uint16_t *pgpvalue);
-int gpio_setdir(int filedesc, uint16_t gpdir);
-int gpio_getdir(int filedesc, uint16_t *pgpdir);
+extern int gpio_setval(int filedesc, uint16_t gpvalue);
+extern int gpio_getval(int filedesc, uint16_t *pgpvalue);
+extern int gpio_setdir(int filedesc, uint16_t gpdir);
+extern int gpio_getdir(int filedesc, uint16_t *pgpdir);
 /*==========================================================*/
 /* Helper functions */
-void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
+extern void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
 /*==========================================================*/
 /* Macros */
 #define MCP2210_HID_REPORT_LEN					64
@@ -167,7 +164,5 @@ void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
 #define cDEV_PIN_GPIO                 			0x00
 #define cDEV_PIN_ALTFUNC_1            			0x01 /* chip select */
 #define cDEV_PIN_ALTFUNC_2            			0x02 /* leds, other */
-
-#endif //#ifndef _MCP2210_API_H_
 
 #endif //#ifdef __linux__

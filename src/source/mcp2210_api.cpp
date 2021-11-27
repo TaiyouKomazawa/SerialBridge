@@ -21,7 +21,7 @@ TO MICROCHIP FOR THIS SOFTWARE.
 
 #ifdef __linux__
 
-#include <mcp2210_api.h>
+#include "../mcp2210_api.h"
 
 int open_device(const char *device)
 {

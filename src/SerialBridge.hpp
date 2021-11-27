@@ -58,7 +58,7 @@ private:
 
     SerialInterface *_si;
 
-    const unsigned int _buff_size;
+    unsigned int _buff_size;
 };
 
 #endif //#ifndef _SERIAL_BRIDGE_HPP_

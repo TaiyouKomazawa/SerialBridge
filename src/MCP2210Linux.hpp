@@ -7,13 +7,14 @@
 
 #ifdef __linux__
 
+#ifndef _MCP2210_LINUX_HPP_
+#define _MCP2210_LINUX_HPP_
+
 #include <stdint.h>
 
-extern "C" {
-#include "mcp2210_api.h"
-}
-
 #include "SyncSerialDev.hpp"
+
+#include "mcp2210_api.h"
 
 class MCP2210Linux : public SyncSerialDev
 {
@@ -37,6 +38,7 @@ public:
     enum{
         SPI_MODE = 0,
         SPI_SPEED = 5000000, //bps
+        //SPI_SPEED = 5000, //bps
     	DEFAULRT_BUFFER_SIZE = 32,
     };
 
@@ -48,6 +50,6 @@ private:
     uint8_t _buffer_size;
 };
 
-int MCP2210Linux::_fd = -1;
+#endif //#ifndef _MCP2210_LINUX_HPP_
 
 #endif //#ifdef __linux__

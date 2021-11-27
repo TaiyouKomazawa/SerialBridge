@@ -11,8 +11,8 @@ add_subdirectory(src/source)
 
 include_directories(./src)
 
-file(GLOB CXX_FILES ./src/source/*.cpp)
-file(GLOB C_FILES ./src/source/*.c)
+file(GLOB CXX_FILES src/source/*.cpp)
+file(GLOB C_FILES src/source/*.c)
 
 add_library(serial_bridge OBJECT ${CXX_FILES} ${C_FILES})
 add_library(serial_bridge_static STATIC $<TARGET_OBJECTS:serial_bridge>)

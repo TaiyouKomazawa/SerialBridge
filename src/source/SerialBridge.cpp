@@ -24,9 +24,10 @@ SerialBridge::SerialBridge(SerialDev *dev, const unsigned int buff_size)
 *                An argument that indicates a synchronous serial device class object.
 */
 SerialBridge::SerialBridge(SyncSerialDev *dev)
-:   _id_list(), _buff_size(dev->size())
+:   _id_list()
 {
     _si = new SyncableSerial(dev);
+    _buff_size = dev->size();
 }
 
 /**
@@ -140,7 +141,6 @@ int SerialBridge::_id_2_order(frame_id id)
     }
     return -1;
 }
-
 /**
 * @brief Update the message from the packet data obtained from the serial device.
 * The acquired packet data is checked for consistency from the packet length and checksum,
@@ -151,6 +151,7 @@ int SerialBridge::_id_2_order(frame_id id)
 * @retval -2 : Received packet is invalid.
 * @retval -3 : The id of the received message is unregistered.
 */
+#include <stdio.h>
 int SerialBridge::_update_frame()
 {
     uint8_t tmp[_buff_size];

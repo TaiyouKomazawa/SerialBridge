@@ -8,10 +8,12 @@
 #include "../SyncableSerial.hpp"
 
 SyncableSerial::SyncableSerial(SyncSerialDev *dev)
-:	_dev(dev),
-	_rx_buffer(new uint8_t(dev->size())),
-	_tx_buffer(new uint8_t(dev->size()))
+:	_dev(dev)
 {
+    const int size = _dev->size();
+    _rx_buffer = new uint8_t[size];
+	_tx_buffer = new uint8_t[size];
+
     _data_updated = true;
 }
 
@@ -23,9 +25,13 @@ SyncableSerial::~SyncableSerial()
 
 int SyncableSerial::read(uint8_t *data)
 {
-    memcpy(data,(_rx_buffer+1),_rx_buffer[0]);
-    _data_updated = false;
-    return _rx_buffer[0];
+    unsigned int len = _rx_buffer[0];
+    if(len <= _dev->size()){
+        memcpy(data,(_rx_buffer+1),len);
+        _data_updated = false;
+        return len+1;
+    }
+    return 1;
 }
 
 int SyncableSerial::write(uint8_t *data, const unsigned int len)

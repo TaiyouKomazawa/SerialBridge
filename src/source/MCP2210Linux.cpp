@@ -9,6 +9,8 @@
 
 #include "../MCP2210Linux.hpp"
 
+int MCP2210Linux::_fd = -1;
+
 MCP2210Linux::MCP2210Linux(const char *device, MCP2210Linux::cs_pin_t active_cs, int spi_mode, int spi_speed, uint8_t buffer_size)
 :   _active_cs(active_cs),
     _spi_mode(spi_mode),
