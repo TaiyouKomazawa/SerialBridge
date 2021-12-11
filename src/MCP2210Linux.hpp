@@ -7,13 +7,14 @@
 
 #ifdef __linux__
 
+#ifndef _MCP2210_LINUX_HPP_
+#define _MCP2210_LINUX_HPP_
+
 #include <stdint.h>
 
-extern "C" {
-#include "mcp2210_api.h"
-}
-
 #include "SyncSerialDev.hpp"
+
+#include "mcp2210_api.h"
 
 class MCP2210Linux : public SyncSerialDev
 {
@@ -48,6 +49,6 @@ private:
     uint8_t _buffer_size;
 };
 
-int MCP2210Linux::_fd = -1;
+#endif //#ifndef _MCP2210_LINUX_HPP_
 
 #endif //#ifdef __linux__
