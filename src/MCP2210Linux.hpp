@@ -38,6 +38,7 @@ public:
     enum{
         SPI_MODE = 0,
         SPI_SPEED = 5000000, //bps
+        //SPI_SPEED = 5000, //bps
     	DEFAULRT_BUFFER_SIZE = 32,
     };
 

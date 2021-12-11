@@ -151,6 +151,7 @@ int SerialBridge::_id_2_order(frame_id id)
 * @retval -2 : Received packet is invalid.
 * @retval -3 : The id of the received message is unregistered.
 */
+#include <stdio.h>
 int SerialBridge::_update_frame()
 {
     uint8_t tmp[_buff_size];
