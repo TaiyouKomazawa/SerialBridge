@@ -13,7 +13,8 @@ SyncableSerial::SyncableSerial(SyncSerialDev *dev)
     const int size = _dev->size();
     _rx_buffer = new uint8_t[size];
 	_tx_buffer = new uint8_t[size];
-
+    memset(_tx_buffer, 0, size);
+	memset(_rx_buffer, 0, size);
     _data_updated = true;
 }
 
