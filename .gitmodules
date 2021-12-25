@@ -1,0 +1,3 @@
+[submodule "MCP2210-Library"]
+	path = MCP2210-Library
+	url = https://github.com/kerrydwong/MCP2210-Library.git

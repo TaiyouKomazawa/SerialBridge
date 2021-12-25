@@ -10,11 +10,13 @@
 #ifndef _MCP2210_LINUX_HPP_
 #define _MCP2210_LINUX_HPP_
 
+#include <stdlib.h>
 #include <stdint.h>
+#include <wchar.h>
 
+#include "../MCP2210-Library/hidapi.h"
+#include "../MCP2210-Library/mcp2210.h"
 #include "SyncSerialDev.hpp"
-
-#include "mcp2210_api.h"
 
 class MCP2210Linux : public SyncSerialDev
 {
@@ -25,7 +27,7 @@ public:
     }cs_pin_t;
 
 
-    MCP2210Linux(const char *device, cs_pin_t active_cs, 
+    MCP2210Linux(wchar_t* serial_number, cs_pin_t active_cs, 
                     int spi_mode = SPI_MODE, 
                     int spi_speed = SPI_SPEED,
                     uint8_t buffer_size = DEFAULRT_BUFFER_SIZE);
@@ -36,18 +38,17 @@ public:
     virtual unsigned int size();
 
     enum{
-        SPI_MODE = 0,
-        SPI_SPEED = 5000000, //bps
-        //SPI_SPEED = 5000, //bps
+        SPI_MODE = 3,
+        SPI_SPEED = 8000000, //bps
     	DEFAULRT_BUFFER_SIZE = 32,
     };
 
 private:
-    static int _fd;
-    cs_pin_t _active_cs;
-    int _spi_mode, _spi_speed;
+    static bool _is_opened;
 
     uint8_t _buffer_size;
+
+    hid_device *_handle;
 };
 
 #endif //#ifndef _MCP2210_LINUX_HPP_
