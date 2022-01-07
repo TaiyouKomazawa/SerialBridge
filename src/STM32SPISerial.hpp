@@ -18,7 +18,7 @@
 class STM32SPISerial : public SyncSerialDev
 {
 public:
-	STM32SPISerial(SPI_TypeDef *SPIx, uint8_t buffer_size = DEFAULRT_BUFFER_SIZE);
+	STM32SPISerial(SPI_HandleTypeDef  *hspix, uint8_t buffer_size = DEFAULRT_BUFFER_SIZE);
 
     virtual int update(unsigned char *rx_data, unsigned char *tx_data);
 
@@ -29,7 +29,7 @@ public:
     };
 
 private:
-    SPI_TypeDef *_SPIx;
+    SPI_HandleTypeDef  *_hspix;
 
     uint8_t _buffer_size;
 };

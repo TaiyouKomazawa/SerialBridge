@@ -9,9 +9,11 @@
 
 #include "../STM32SPISerial.hpp"
 
-STM32SPISerial::STM32SPISerial(SPI_TypeDef *SPIx, uint8_t buffer_size)
-:   _SPIx(SPIx), _buffer_size(buffer_size)
-{}
+STM32SPISerial::STM32SPISerial(SPI_HandleTypeDef  *hspix, uint8_t buffer_size)
+:   _hspix(hspix), _buffer_size(buffer_size)
+{
+	__HAL_SPI_ENABLE(_hspix);
+}
 
 /**
 * @brief Update data synchronization.
@@ -22,16 +24,10 @@ STM32SPISerial::STM32SPISerial(SPI_TypeDef *SPIx, uint8_t buffer_size)
 */
 int STM32SPISerial::update(unsigned char *rx_data, unsigned char *tx_data)
 {
-	int16_t count = _buffer_size;
-	while (count > 0) {
-		while (LL_SPI_IsActiveFlag_TXE(_SPIx) == RESET);
-		LL_SPI_TransmitData8(_SPIx, (uint8_t)*tx_data++);
-		while (LL_SPI_IsActiveFlag_RXNE(_SPIx) == RESET);
-		*rx_data++ = (uint8_t)LL_SPI_ReceiveData8(_SPIx);
-		count--;
-	}
-
-    return 0;
+	return HAL_SPI_TransmitReceive_DMA(_hspix,
+											(uint8_t *)tx_data,
+											(uint8_t *)rx_data,
+											_buffer_size);
 }
 
 /**
