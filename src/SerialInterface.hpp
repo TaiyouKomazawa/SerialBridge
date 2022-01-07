@@ -20,7 +20,7 @@ public:
 
     virtual int write(uint8_t *data, const unsigned int len) = 0;
 
-    virtual void update() = 0;
+    virtual int update() = 0;
 };
 
 #endif //#ifndef _SERIAL_INTERFACE_HPP_

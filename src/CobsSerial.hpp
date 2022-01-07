@@ -116,7 +116,7 @@ public:
 
     virtual int write(uint8_t *data, const unsigned int len);
 
-    virtual void update();
+    virtual int update();
 
     enum{
         RX_BUFFER_SIZE = 256,

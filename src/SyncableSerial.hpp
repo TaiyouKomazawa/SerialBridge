@@ -28,12 +28,11 @@ public:
 
     virtual int write(uint8_t *data, const unsigned int len);
 
-    virtual void update();
+    virtual int update();
 
 private:
     SyncSerialDev *_dev;
     uint8_t *_rx_buffer, *_tx_buffer;
-    bool _data_updated;
 };
 
 #endif //#ifndef _SYNCABLE_SERIAL_HPP_

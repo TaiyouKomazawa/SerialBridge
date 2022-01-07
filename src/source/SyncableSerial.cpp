@@ -15,7 +15,6 @@ SyncableSerial::SyncableSerial(SyncSerialDev *dev)
 	_tx_buffer = new uint8_t[size];
     memset(_tx_buffer, 0, size);
 	memset(_rx_buffer, 0, size);
-    _data_updated = true;
 }
 
 SyncableSerial::~SyncableSerial()
@@ -27,12 +26,11 @@ SyncableSerial::~SyncableSerial()
 int SyncableSerial::read(uint8_t *data)
 {
     unsigned int len = _rx_buffer[0];
-    if(len <= _dev->size()){
+    if(0 < len && len <= _dev->size()){
         memcpy(data,(_rx_buffer+1),len);
-        _data_updated = false;
         return len+1;
     }
-    return 1;
+    return 0;
 }
 
 int SyncableSerial::write(uint8_t *data, const unsigned int len)
@@ -40,16 +38,14 @@ int SyncableSerial::write(uint8_t *data, const unsigned int len)
     if(_dev->size() >= len+1){
         _tx_buffer[0] = (uint8_t)len;
         memcpy((_tx_buffer+1),data,len);
-        _data_updated = false;
         return len+1;
     }
     return 0;
 }
 
-void SyncableSerial::update()
+int SyncableSerial::update()
 {
-    if(!_data_updated){
-        _dev->update(_rx_buffer, _tx_buffer);
-        _data_updated = true;
-    }
+	int state = -1;
+    state = _dev->update(_rx_buffer, _tx_buffer);
+    return state;
 }
