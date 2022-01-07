@@ -11,40 +11,34 @@
 
 #include <stdio.h>
 
-bool MCP2210Linux::_is_opened = false;
+hid_device *MCP2210Linux::_handle = NULL;
 
-MCP2210Linux::MCP2210Linux(wchar_t* serial_number, MCP2210Linux::cs_pin_t active_cs, int spi_mode, int spi_speed, uint8_t buffer_size)
-:   _buffer_size(buffer_size)
+MCP2210Linux::MCP2210Linux(wchar_t* serial_number, MCP2210Linux::cs_pin_t active_cs, uint8_t buffer_size, uint32_t spi_speed, uint8_t spi_mode)
+:   _active_cs(active_cs),
+    _buffer_size(buffer_size),
+    _spi_speed(spi_speed),
+    _spi_mode(spi_mode)
 {
- 
-    _handle = InitMCP2210(serial_number);
+    int rlt = 0; 
+    if(_handle == NULL){
+        _handle = InitMCP2210(serial_number);
 
-    ChipSettingsDef chipDef;
+        ChipSettingsDef chipDef;
  
-    chipDef = GetChipSettings(_handle);
+        chipDef = GetChipSettings(_handle);
  
-    for (int i = 0; i < 9; i++) {
-        chipDef.GP[i].PinDesignation = GP_PIN_DESIGNATION_CS;
-        chipDef.GP[i].GPIODirection = GPIO_DIRECTION_OUTPUT;
-        chipDef.GP[i].GPIOOutput = 1;
+        for (int i = 0; i < 9; i++) {
+            chipDef.GP[i].PinDesignation = GP_PIN_DESIGNATION_CS;
+            chipDef.GP[i].GPIODirection = GPIO_DIRECTION_OUTPUT;
+            chipDef.GP[i].GPIOOutput = 1;
+        }
+        rlt = SetChipSettings(_handle, chipDef);
+        rlt &= _spi_trx_setting(true);
+    }else{
+        rlt &= _spi_trx_setting(false);
     }
-    int r = SetChipSettings(_handle, chipDef);
-    
-    SPITransferSettingsDef def;
-    def = GetSPITransferSettings(_handle);
  
-    def.ActiveChipSelectValue = ~(1 << (int)active_cs);
-    def.IdleChipSelectValue = 0xffff;
-    def.BitRate = spi_speed;
-    def.BytesPerSPITransfer = _buffer_size;
-    def.SPIMode = spi_mode;
-    def.CSToDataDelay = 0;
-    def.LastDataByteToCSDelay = 0;
-    def.SubsequentDataByteDelay = 0;
- 
-    r &= SetSPITransferSettings(_handle, def);
- 
-    if (r != 0) {
+    if (rlt != 0) {
         printf("Errror setting SPI parameters.\n");
         exit(EXIT_FAILURE);
     }
@@ -57,6 +51,8 @@ MCP2210Linux::~MCP2210Linux()
 
 int MCP2210Linux::update(unsigned char *rx_data, unsigned char *tx_data)
 {
+    //if(_spi_trx_setting(false) != 0)
+    //    return -2;
     SPIDataTransferStatusDef def1 = SPISendReceive(_handle, tx_data, _buffer_size);
     if(def1.NumberOfBytesReceived == _buffer_size){
         for(int i = 0; i < _buffer_size; i++){
@@ -70,6 +66,28 @@ int MCP2210Linux::update(unsigned char *rx_data, unsigned char *tx_data)
 unsigned int MCP2210Linux::size()
 {
     return _buffer_size;
+}
+
+int MCP2210Linux::_spi_trx_setting(bool is_init)
+{
+    static SPITransferSettingsDef def;
+    def = GetSPITransferSettings(_handle);
+    if(is_init){
+        def.ActiveChipSelectValue = 0x1ff & ~(1 << (int)_active_cs);
+        def.IdleChipSelectValue = 0xffff;
+        def.BitRate = _spi_speed;
+        def.BytesPerSPITransfer = _buffer_size;
+        def.SPIMode = _spi_mode;
+        def.CSToDataDelay = 0;
+        def.LastDataByteToCSDelay = 0;
+        def.SubsequentDataByteDelay = 0;
+    }else{
+        def.ActiveChipSelectValue = def.ActiveChipSelectValue & ~(1 << (int)_active_cs);
+        def.BitRate = _spi_speed;
+        def.BytesPerSPITransfer = _buffer_size;
+        def.SPIMode = _spi_mode;
+    }
+    return SetSPITransferSettings(_handle, def);
 }
 
 #endif //#ifdef __linux__

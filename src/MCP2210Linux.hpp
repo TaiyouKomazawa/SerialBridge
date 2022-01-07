@@ -28,9 +28,9 @@ public:
 
 
     MCP2210Linux(wchar_t* serial_number, cs_pin_t active_cs, 
-                    int spi_mode = SPI_MODE, 
-                    int spi_speed = SPI_SPEED,
-                    uint8_t buffer_size = DEFAULRT_BUFFER_SIZE);
+                    uint8_t buffer_size = DEFAULRT_BUFFER_SIZE,
+                    uint32_t spi_speed = SPI_SPEED,
+                    uint8_t spi_mode = SPI_MODE);
     virtual ~MCP2210Linux();
 
     virtual int update(unsigned char *rx_data, unsigned char *tx_data);
@@ -44,11 +44,15 @@ public:
     };
 
 private:
-    static bool _is_opened;
 
+    int _spi_trx_setting(bool is_init);
+
+    cs_pin_t _active_cs;
     uint8_t _buffer_size;
+    uint32_t _spi_speed;
+    uint8_t _spi_mode;
 
-    hid_device *_handle;
+    static hid_device *_handle;
 };
 
 #endif //#ifndef _MCP2210_LINUX_HPP_
