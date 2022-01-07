@@ -12,11 +12,10 @@
 *           int32_t y;
 *           int32_t z;
 *       } Vector3_t;
-*       //Define data classification number.
-*       #define VECTOR3_ID 0
+*
 *       //Put the data format in the message type.
 *       //(Since the name is long, you can rename it with typedef as follows.)
-*       typedef sb::Message<Vector3_t,VECTOR3_ID> Vector3;
+*       typedef sb::Message<Vector3_t> Vector3;
 *
 * @par How to use:
 *       Vector3 msg; //Declare a message.
@@ -57,16 +56,8 @@ namespace sb
 class MessageInterface
 {
 public:
-    uint8_t *ptr();
-
-    void packing(uint8_t id);
-    void unpacking();
-
-    /**
-    * @brief Returns the length of the current packet.
-    * @return int Current packet array length.
-    */
-    virtual int size() = 0;
+    void packing(uint8_t id, uint8_t *send_packet, int *data_size);
+    void unpacking(uint8_t *received_packet);
 
     /**
     * @brief Returns whether the message has been updated.
@@ -78,10 +69,28 @@ public:
 
 protected:
     /**
-    * @brief A function that returns a data structure.
+    * @brief A function that returns a data structure for packing().
     * @return *void Pointer to the data structure of the derived class.
     */
-    virtual void *_data_ptr() = 0;
+    virtual void *_pk_data_ptr() = 0;
+
+    /**
+    * @brief Returns the length of the current packet for packing().
+    * @return int Current packet array length.
+    */
+    virtual int _pk_size() = 0;
+
+    /**
+    * @brief A function that returns a data structure for unpacking().
+    * @return *void Pointer to the data structure of the derived class.
+    */
+    virtual void *_upk_data_ptr() = 0;
+
+    /**
+    * @brief Returns the length of the current packet for unpacking().
+    * @return int Current packet array length.
+    */
+    virtual int _upk_size() = 0;
 
     /**
     * @brief The length of the packet used to identify the data.
@@ -90,7 +99,6 @@ protected:
         CTRL_DATA_LEN = 2,
     };
 
-    uint8_t *_all_packet;
     volatile bool _unpacked;
 };
 
@@ -111,20 +119,14 @@ public:
     /**
     * @brief Message class constructor.
     */
-    Message()
-    {
-        _all_packet = new uint8_t[sizeof(DataStruct) + CTRL_DATA_LEN];
-    }
+    Message(){}
 
     /**
     * @brief Message class destructor.
     */
-    ~Message()
-    {
-        delete[] _all_packet;
-    }
+    ~Message(){}
 
-    virtual int size()
+    int size()
     {
         return sizeof(DataStruct) + CTRL_DATA_LEN;
     }
@@ -138,9 +140,90 @@ public:
 
 private:
 
-    virtual void *_data_ptr()
+    virtual void *_pk_data_ptr()
     {
         return &data;
+    }
+
+    virtual int _pk_size()
+    {
+        return size();
+    }
+
+    virtual void *_upk_data_ptr()
+    {
+        return &data;
+    }
+
+    virtual int _upk_size()
+    {
+        return size();
+    }
+};
+
+/**
+* @brief A class that stores the data processed by the SerialBridge class.
+* @tparam DataStructIn  Specifies the type of input data structure to process in the sb::DuplexMessage.
+* @tparam DataStructOut Specifies the type of output data structure to process in the sb::DuplexMessage.
+*/
+template <class DataStructIn, class DataStructOut = DataStructIn>
+class DuplexMessage : public MessageInterface
+{
+public:
+    /**
+    * @brief Tx and Rx data is exchanged through this member variable.
+    * You can specify any structure type here with template parameters.
+    */
+    DataStructOut tx;
+    DataStructIn rx;
+
+    /**
+    * @brief Message class constructor.
+    */
+    DuplexMessage(){}
+
+    /**
+    * @brief Message class destructor.
+    */
+    ~DuplexMessage(){}
+
+    int tx_size()
+    {
+        return sizeof(DataStructOut) + CTRL_DATA_LEN;
+    }
+
+    int rx_size()
+    {
+        return sizeof(DataStructIn) + CTRL_DATA_LEN;
+    }
+
+    virtual bool was_updated()
+    {
+        bool tmp = _unpacked;
+        _unpacked = false;
+        return tmp;
+    }
+
+private:
+
+    virtual void *_pk_data_ptr()
+    {
+        return &tx;
+    }
+
+    virtual int _pk_size()
+    {
+        return tx_size();
+    }
+
+    virtual void *_upk_data_ptr()
+    {
+        return &rx;
+    }
+
+    virtual int _upk_size()
+    {
+        return rx_size();
     }
 };
 

@@ -106,13 +106,16 @@ int SerialBridge::rm_frame(frame_id id)
 */
 int SerialBridge::write(SerialBridge::frame_id id)
 {
+
     int order = _id_2_order(id);
+    int size;
+    uint8_t tmp[_buff_size];
+    _str[order]->packing(id, tmp, &size);
 
     if(order < 0)
         return -1; //undefined data structure
 
-    _str[order]->packing(id);
-    return _si->write(_str[order]->ptr(), _str[order]->size());
+    return _si->write(tmp, size);
 }
 
 /**
@@ -170,10 +173,8 @@ int SerialBridge::_update_frame()
         for(int i = 0; i < len-1; i++)
             sum += tmp[i];
 
-        if(tmp[len - 1] == (uint8_t)(sum & 0xFF) && len == _str[order]->size()){
-            for (int i = 0; i < len; i++)
-                _str[order]->ptr()[i] = tmp[i];
-            _str[order]->unpacking();
+        if(tmp[len - 1] == (uint8_t)(sum & 0xFF)){
+            _str[order]->unpacking(tmp);
             return 0;
         }else
             return -2; //data error

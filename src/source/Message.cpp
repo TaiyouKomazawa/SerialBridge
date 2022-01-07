@@ -8,40 +8,39 @@
 #include "../Message.hpp"
 
 /**
-* @brief Returns a pointer to the current packet.
-* @return uint8_t* Pointer indicating the packet array.
-*/
-uint8_t* sb::MessageInterface::ptr()
-{
-    return _all_packet;
-}
-
-/**
 * @brief Stores the data structure in a packet.
 * This function is used internally by SerialBridge when sending.
 * @param[in] id Message ID assigned when sending.
+* @param[out] send_packet Array pointer to put the data after packing.
+* @param [out] data_size Integer pointer to the length of data to pack.
 * @return None
 */
-void sb::MessageInterface::packing(uint8_t id)
+void sb::MessageInterface::packing(uint8_t id, uint8_t *send_packet, int *data_size)
 {
-    _all_packet[0] = id;
-
+    int size = _pk_size();
     uint32_t sum = 0;
-    memcpy(_all_packet+1, _data_ptr(), size()-CTRL_DATA_LEN);
-    for (int i = 0; i < size() - 1; i++)
+
+    *data_size = size;
+    send_packet[0] = id;
+    memcpy(send_packet+1, _pk_data_ptr(), size-CTRL_DATA_LEN);
+    for (int i = 0; i < size - 1; i++)
     {
-        sum += _all_packet[i];
+        sum += send_packet[i];
     }
-    _all_packet[size()-1] = (uint8_t)(sum & 0xFF);
+    send_packet[size-1] = (uint8_t)(sum & 0xFF);
 }
 
 /**
 * @brief Extract the data structure from the packet.
 * This function is used internally by SerialBridge on reception.
+* @param[in] received_packet Array pointer to unpack.
 * @return None
 */
-void sb::MessageInterface::unpacking()
+void sb::MessageInterface::unpacking(uint8_t *received_packet)
 {
-    memcpy(_data_ptr(), _all_packet+1, size()-CTRL_DATA_LEN);
+    int size = _upk_size();
+    uint32_t sum = 0;
+
+    memcpy(_upk_data_ptr(), received_packet+1, size-CTRL_DATA_LEN);
     _unpacked = true;
 }
