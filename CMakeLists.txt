@@ -11,20 +11,18 @@ set(H_MCP2210 MCP2210-Library/mcp2210.h MCP2210-Library/hidapi.h)
 
 target_sources(serial_bridge
         PRIVATE
-        # .cpp ファイルはここに書く
         ${S_MCP2210}
         ${S_FILES}
         )
 set_property(TARGET serial_bridge
         PROPERTY PUBLIC_HEADER
-        # .hpp ファイルはここに書く
         ${H_MCP2210}
         ${H_FILES}
         )
 target_include_directories(serial_bridge
         INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> # ライブラリのビルド時に読み込むべき include ディレクトリ
-        $<INSTALL_INTERFACE:include>) # ライブラリのインストール時（依存側で）読み込むべき include ディレクトリ
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> 
+        $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(serial_bridge hidapi-hidraw)
 

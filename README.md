@@ -1,7 +1,38 @@
 # SerialBridge (for SPI)
 ##  概要
-本ライブラリは、PC(MCP2210)とSTM32-MCUをSPIで接続する目的でフォーク・変更されました。   
+本ライブラリは、PC(Linux MCP2210)とSTM32-MCUをSPIで接続する目的でフォーク・変更されました。   
 1対1全二重シリアル通信により通信の高速化、安定化を図っています。    
+
+## 導入
+
+### PC(Linux)
+サブモジュールと一緒にクローンする。
+```shell
+git clone https://github.com/TaiyouKomazawa/SerialBridge.git --recursive
+``` 
+静的ライブラリをビルドする。
+```shell
+cd SerialBridge
+cmake CMakeLists.txt
+make all
+```
+SerialBridge直下に"libserial_bridge.a"が生成される。
+
+### STM32-MCU
+プロジェクトはC++を使用するオプションに指定する。   
+サブモジュールは要らないので普通にクローンする。
+```shell
+git clone https://github.com/TaiyouKomazawa/SerialBridge.git 
+``` 
+SPIモジュールのMXCubeでの設定は次のようにする。 
+- Mode : Full-Duplex Slave
+- Hardware NSS Signal : Hardware NSS Input Signal
+- Frame Format : Motorola
+- Data Size : 8 bits
+- First Bit : MSB First
+- Clock Parameters (Mode 3)     
+  - CPOL : High
+  - CPHA : 2 Edge
 
 ## リリースバージョン
 
