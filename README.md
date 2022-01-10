@@ -31,8 +31,12 @@ SPIモジュールのMXCubeでの設定は次のようにする。
 - Data Size : 8 bits
 - First Bit : MSB First
 - Clock Parameters (Mode 3)     
-  - CPOL : High
-  - CPHA : 2 Edge
+  - CPOL : High 
+  - CPHA : 2 Edge   
+
+またRXとTX共にDMAチャンネルを設定する。   
+DMA設定はNormalモードでDataWidthはByte-Byteに設定する。     
+優先度はVery Highが推奨される。
 
 ## リリースバージョン
 
