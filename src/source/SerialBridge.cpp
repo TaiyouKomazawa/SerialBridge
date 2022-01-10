@@ -15,7 +15,23 @@
 SerialBridge::SerialBridge(SerialDev *dev, const unsigned int buff_size)
 :   _id_list(), _buff_size(buff_size)
 {
-    _dev = new CobsSerial(dev, _buff_size);
+    _si = new CobsSerial(dev, _buff_size);
+    for(int i = 0; i < STRUCT_MAX_NUM; i++)
+    	_str[i] = NULL;
+}
+
+/**
+* @brief SerialBridge class constructor.
+* @param[in] dev (SyncSerialDev class pointer) 
+*                An argument that indicates a synchronous serial device class object.
+*/
+SerialBridge::SerialBridge(SyncSerialDev *dev)
+:   _id_list()
+{
+    _si = new SyncableSerial(dev);
+    _buff_size = dev->size();
+    for(int i = 0; i < STRUCT_MAX_NUM; i++)
+    	_str[i] = NULL;
 }
 
 /**
@@ -23,7 +39,7 @@ SerialBridge::SerialBridge(SerialDev *dev, const unsigned int buff_size)
 */
 SerialBridge::~SerialBridge()
 {
-    delete _dev;
+    delete _si;
 }
 
 /**
@@ -83,43 +99,6 @@ int SerialBridge::rm_frame(frame_id id)
 }
 
 /**
-* @brief Update the message from the packet data obtained from the serial device.
-* The acquired packet data is checked for consistency from the packet length and checksum,
-*  and passed to the ID registration message.
-* @return int Data acquisition status.
-* @retval  0 : Updated message.
-* @retval -1 : Message not received.
-* @retval -2 : Received packet is invalid.
-* @retval -3 : The id of the received message is unregistered.
-*/
-int SerialBridge::read()
-{
-    uint8_t tmp[_buff_size];
-    memset(&tmp, 0, _buff_size);
-    int len = _dev->read(tmp) - 1;
-    if(len > 0){
-        int order = _id_2_order(tmp[0]);
-
-        if(order < 0)
-            return -3; //undefined data structure
-
-        uint32_t sum = 0;
-        for(int i = 0; i < len-1; i++)
-            sum += tmp[i];
-
-        if(tmp[len - 1] == (uint8_t)(sum & 0xFF) && len == _str[order]->size()){
-            for (int i = 0; i < len; i++)
-                _str[order]->ptr()[i] = tmp[i];
-            _str[order]->unpacking();
-            return 0;
-        }else
-            return -2; //data error
-    }
-
-    return -1; //cannot received
-}
-
-/**
 * @brief Sends the message registered with the specified id.
 * @param[in] id (Message identification number)ID of the message you want to send.
 * @return int Number of written data(byte) or error code.
@@ -127,24 +106,32 @@ int SerialBridge::read()
 */
 int SerialBridge::write(SerialBridge::frame_id id)
 {
+
     int order = _id_2_order(id);
+    int size;
+    uint8_t tmp[_buff_size];
+    _str[order]->packing(id, tmp, &size);
 
     if(order < 0)
         return -1; //undefined data structure
 
-    _str[order]->packing(id);
-    return _dev->write(_str[order]->ptr(), _str[order]->size());
+    return _si->write(tmp, size);
 }
 
 /**
 * @brief
 * Update the received data from the serial device.
 * (Note that this function must be called every time in a processing loop to get the data.)
-* @return None
+* @return int Data acquisition status.
+* @retval  0 : Updated message.
+* @retval -1 : Message not received.
+* @retval -2 : Received packet is invalid.
+* @retval -3 : The id of the received message is unregistered.
 */
-void SerialBridge::update()
+int SerialBridge::update()
 {
-    _dev->update();
+    _si->update();
+    return _update_frame();
 }
 
 /**
@@ -160,4 +147,38 @@ int SerialBridge::_id_2_order(frame_id id)
             return i;
     }
     return -1;
+}
+/**
+* @brief Update the message from the packet data obtained from the serial device.
+* The acquired packet data is checked for consistency from the packet length and checksum,
+*  and passed to the ID registration message.
+* @return int Data acquisition status.
+* @retval  0 : Updated message.
+* @retval -1 : Message not received.
+* @retval -2 : Received packet is invalid.
+* @retval -3 : The id of the received message is unregistered.
+*/
+int SerialBridge::_update_frame()
+{
+    uint8_t tmp[_buff_size];
+    memset(&tmp, 0, _buff_size);
+    int len = _si->read(tmp) - 1;
+    if(len > 0){
+        int order = _id_2_order(tmp[0]);
+
+        if(order < 0)
+            return -3; //undefined data structure
+
+        uint32_t sum = 0;
+        for(int i = 0; i < len-1; i++)
+            sum += tmp[i];
+
+        if(tmp[len - 1] == (uint8_t)(sum & 0xFF)){
+            _str[order]->unpacking(tmp);
+            return 0;
+        }else
+            return -2; //data error
+    }
+
+    return -1; //cannot received
 }
