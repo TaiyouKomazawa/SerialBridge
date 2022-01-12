@@ -39,7 +39,6 @@ void sb::MessageInterface::packing(uint8_t id, uint8_t *send_packet, int *data_s
 void sb::MessageInterface::unpacking(uint8_t *received_packet)
 {
     int size = _upk_size();
-    uint32_t sum = 0;
 
     memcpy(_upk_data_ptr(), received_packet+1, size-CTRL_DATA_LEN);
     _unpacked = true;
