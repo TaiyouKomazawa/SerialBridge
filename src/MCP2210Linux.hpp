@@ -10,6 +10,7 @@
 #ifndef _MCP2210_LINUX_HPP_
 #define _MCP2210_LINUX_HPP_
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <wchar.h>
@@ -17,6 +18,7 @@
 #include "../MCP2210-Library/hidapi.h"
 #include "../MCP2210-Library/mcp2210.h"
 #include "SyncSerialDev.hpp"
+
 
 class MCP2210Linux : public SyncSerialDev
 {
@@ -26,6 +28,26 @@ public:
         GP0 = 0, GP1, GP2, GP3, GP4, GP5, GP6, GP7, GP8,
     }cs_pin_t;
 
+    static hid_device_info *get_dev_info()
+    {
+        return EnumerateMCP2210();
+    }
+
+    static void display_serial_number()
+    {
+        hid_device_info *dev = get_dev_info();
+        if(dev == NULL){
+            puts("MCP2210 was not found.");
+            return ;
+        }
+        puts("MCP2210 SerialNumber List-------");
+        puts("File path\t: Serial number");
+        while(dev != NULL){
+            printf("%s\t: %ls\n", dev->path, dev->serial_number);
+            dev = dev->next;
+        }
+        puts("end-----------------------------");
+    }
 
     MCP2210Linux(wchar_t* serial_number, cs_pin_t active_cs, 
                     uint8_t buffer_size = DEFAULRT_BUFFER_SIZE,
