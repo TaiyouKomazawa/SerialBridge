@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.00)
 project(serial_bridge VERSION 0.0.1 LANGUAGES CXX)
-
+set(CMAKE_CXX_FLAGS "-O -std=c++11 -Wall")
 add_library(serial_bridge STATIC)
 
 file(GLOB S_FILES src/source/*.cpp src/source/*.c)
@@ -23,8 +23,6 @@ target_include_directories(serial_bridge
         INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> 
         $<INSTALL_INTERFACE:include>)
-
-target_link_libraries(serial_bridge hidapi-hidraw)
 
 install(TARGETS serial_bridge
         EXPORT libserial_bridge
