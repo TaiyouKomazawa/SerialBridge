@@ -227,6 +227,6 @@ private:
     }
 };
 
-};
+}
 
 #endif //#ifndef _SERIAL_BRIDGE_MESSAGE_HPP_
